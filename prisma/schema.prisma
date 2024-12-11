@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("USER_SERVICE_DATABASE_URL")
+}
+
+model User {
+  id                   Int          @id @default(autoincrement()) // Auto-incrementing primary key for MySQL
+  email                String       @unique
+  firstname            String
+  lastname             String
+  phone                String
+  street               String
+  zipcode              String
+  city                 String
+  username             String       @unique
+  password             String       // Storing the hashed password
+
+  isVerified           Boolean      @default(false)  // Indicates if the user is verified
+  status               UserStatus   @default(ACTIVE) // User status (Active, Suspended, Inactive)
+  createdAt            DateTime     @default(now())  // When the user was created
+  updatedAt            DateTime     @updatedAt       // Automatically updated when user changes
+  resetPasswordToken   String?      // Token for password reset
+  resetPasswordExpires DateTime?    // Expiration of the reset token
+
+  sessions             UserSession[] // One-to-many relation: A user can have multiple sessions
+}
+
+model UserSession {
+  id                     Int         @id @default(autoincrement()) // Auto-incrementing primary key for MySQL
+  accessToken            String      // Adjusted for MySQL
+  accessTokenExpiration  DateTime    // When the access token expires
+  refreshToken           String      // Adjusted for MySQL
+  refreshTokenExpiration DateTime    // When the refresh token expires
+  createdAt              DateTime    @default(now()) // When the session was created
+  userId                 Int         // Foreign key reference to User
+  user                   User        @relation(fields: [userId], references: [id]) // Many sessions belong to one user
+
+  deviceInfo             String?     // Information about the device used during the session
+  ipAddress              String?     // IP address of the user
+  isActive               Boolean     @default(true) // Whether the session is currently active
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  INACTIVE
+}
