@@ -24,7 +24,6 @@ export const requestPasswordResetService = async (email: string) => {
     },
   });
 
-  console.log("11111111111111")
 
   await publishResetPasswordMessage(user.email, resetToken);
 };

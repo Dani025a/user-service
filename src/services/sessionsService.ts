@@ -1,13 +1,25 @@
 import { prisma } from '../models';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt';
 import { MESSAGES } from '../messages';
-export const createSession = async (userId: number, email: string, firstname: string, lastname: string, req: any) => {
+
+
+interface SessionData {
+  deviceInfo: string;
+  ipAddress: string;
+}
+
+export const createSession = async (
+  userId: number,
+  email: string,
+  firstname: string,
+  lastname: string,
+  sessionData: SessionData
+) => {
   try {
-    const accessToken = generateAccessToken(userId, email, firstname, lastname );
+    const accessToken = generateAccessToken(userId, email, firstname, lastname);
     const refreshToken = generateRefreshToken(userId, email, firstname, lastname);
 
-    const deviceInfo = req.headers['user-agent'] || 'Unknown Device';
-    const ipAddress = req.ip;
+    console.log('Session Data:', sessionData);
 
     await prisma.userSession.create({
       data: {
@@ -16,17 +28,19 @@ export const createSession = async (userId: number, email: string, firstname: st
         refreshTokenExpiration: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         accessTokenExpiration: new Date(Date.now() + 1 * 60 * 60 * 1000),
         userId,
-        deviceInfo,
-        ipAddress,
+        deviceInfo: sessionData.deviceInfo.substring(0, 255),
+        ipAddress: sessionData.ipAddress,
         isActive: true,
       },
     });
 
     return { accessToken, refreshToken };
   } catch (error) {
+    console.error('Error during session creation:', error.message);
     throw new Error(MESSAGES.SESSION.FAILED_SESSION_CREATION);
   }
 };
+
 
 export const refreshSession = async (refreshToken: string, req: any) => {
   try {

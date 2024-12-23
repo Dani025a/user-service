@@ -13,6 +13,7 @@ export const MESSAGES = {
       INVALID_REFRESH_TOKEN: 'Invalid or expired refresh token',
       REFRESH_TOKEN_MISSING: 'Refresh token missing',
       FAILED_LOGOUT: 'Failed to log out',
+      LOGIN_FAILED: 'Login failed due to an internal server error. Please try again later.',
     },
     PASSWORD: {
       RESET_REQUEST_ERROR: 'Error requesting password reset',
